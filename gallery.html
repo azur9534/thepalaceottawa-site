@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gallery — Palace Ottawa</title>
+  <meta name="description" content="See the energy at Palace Ottawa. Photos from Ottawa's best Afrobeats nightclub."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    /* ── Gallery: Masonry.js — exact same approach as NP Prod ── */
+    .gallery-grid {
+      /* Masonry.js takes over layout — we just set width */
+    }
+    .gallery-item {
+      width: 24%;           /* 4 columns: (100 - 3*1.3%) / 4 ≈ 24% */
+      margin-bottom: 5px;
+      position: relative;
+      cursor: pointer;
+      border-radius: 3px;
+      overflow: hidden;
+      background: #141414;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: auto;         /* full photo, zero crop */
+      display: block;
+      border-radius: 3px;
+      transition: opacity 0.45s ease, transform 0.35s ease;
+      opacity: 0;
+    }
+    .gallery-item img.loaded { opacity: 1; }
+    .gallery-item:hover img  { transform: scale(1.03); }
+    .gallery-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.65), transparent);
+      padding: 28px 12px 10px;
+      border-radius: 0 0 3px 3px;
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay p { font-size: 12px; color: #f5f0e8; }
+    @media (max-width: 900px) { .gallery-item { width: 49%; } }
+    @media (max-width: 480px) { .gallery-item { width: 100%; } }
+    /* Lightbox */
+    #lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.96);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox.active { display: flex; }
+    #lightbox-close {
+      position: absolute; top: 20px; right: 24px;
+      font-size: 2rem; color: #f5f0e8; opacity: 0.6;
+      cursor: pointer; background: none; border: none;
+      transition: opacity 0.2s;
+    }
+    #lightbox-close:hover { opacity: 1; }
+    #lightbox-prev, #lightbox-next {
+      position: absolute; top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem; color: #f5f0e8;
+      opacity: 0.5; cursor: pointer;
+      background: none; border: none;
+      padding: 16px; transition: opacity 0.2s;
+    }
+    #lightbox-prev:hover, #lightbox-next:hover { opacity: 1; }
+    #lightbox-prev { left: 20px; }
+    #lightbox-next { right: 20px; }
+    #lightbox-img {
+      max-width: 90vw; max-height: 85vh;
+      border-radius: 6px; object-fit: contain;
+    }
+    #lightbox-caption {
+      position: absolute; bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px; color: rgba(245,240,232,0.6);
+      white-space: nowrap;
+    }
+    /* Count badge */
+    .filter-count {
+      display: inline-block;
+      background: rgba(201,168,76,0.15);
+      color: var(--gold,#c9a84c);
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 20px;
+      margin-left: 6px;
+    }
+    @media (max-width: 900px) { .gallery-grid { columns: 3; } }
+    @media (max-width: 600px) { .gallery-grid { columns: 2; } }
+  </style>
+</head>
+<body>
+
+<nav id="navbar" class="nav-dark">
+  <a href="index.html" class="nav-logo">
+    <span class="logo-crown">♛</span>
+    <span class="logo-text">PALACE</span>
+    <span class="logo-sub">OTTAWA</span>
+  </a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="gallery.html" class="active">Gallery</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="contact.html" class="nav-cta">Book Now</a></li>
+  </ul>
+</nav>
+
+<section class="page-hero">
+  <div class="page-hero-bg">
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+  </div>
+  <div class="page-hero-content">
+    <p class="hero-eyebrow">Inside Palace</p>
+    <h1 class="page-title">The <em>Gallery</em></h1>
+    <p class="page-subtitle">Two floors. One unforgettable vibe. See what goes down at Ottawa's best Afrobeats nightclub.</p>
+  </div>
+</section>
+
+<div class="filter-bar">
+  <div class="container filter-inner">
+    <button class="filter-btn active" data-filter="all">
+      All <span class="filter-count" id="count-all">200</span>
+    </button>
+    <button class="filter-btn" data-filter="dancefloor">
+      Dance Floor <span class="filter-count" id="count-dancefloor">50</span>
+    </button>
+    <button class="filter-btn" data-filter="vipfloor2">
+      VIP — Floor 2 <span class="filter-count" id="count-vipfloor2">50</span>
+    </button>
+    <button class="filter-btn" data-filter="djstage">
+      DJ & Stage <span class="filter-count" id="count-djstage">50</span>
+    </button>
+    <button class="filter-btn" data-filter="crowd">
+      The Crowd <span class="filter-count" id="count-crowd">50</span>
+    </button>
+  </div>
+</div>
+
+<section class="gallery-section" style="padding: 60px 0;">
+  <div class="container">
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║              HOW TO MANAGE THE GALLERY — READ THIS               ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  YOUR CLOUDINARY BASE URL:                                       ║
+  ║  https://res.cloudinary.com/dzd4bw9fk/image/upload/       ║
+  ║                                            ║
+  ║                                                                  ║
+  ║  FILE NAMING CONVENTION ON CLOUDINARY:                           ║
+  ║  • dancefloor-1.jpg  to  dancefloor-50.jpg                      ║
+  ║  • vipfloor2-1.jpg   to  vipfloor2-50.jpg                       ║
+  ║  • djstage-1.jpg     to  djstage-50.jpg                         ║
+  ║  • crowd-1.jpg       to  crowd-50.jpg                            ║
+  ║                                                                  ║
+  ║  EACH PHOTO ITEM HAS 2 THINGS TO EDIT:                          ║
+  ║  ① data-cat → category for the filter button                     ║
+  ║     Options: dancefloor | vipfloor2 | djstage | crowd           ║
+  ║  ② src → the Cloudinary URL with the correct filename            ║
+  ║  ③ alt → short description of the photo (optional but good)     ║
+  ║                                                                  ║
+  ║  LAZY LOADING: all images use loading="lazy" — the browser       ║
+  ║  only downloads images as the user scrolls. Fast page load.      ║
+  ║                                                                  ║
+  ║  TO ADD MORE PHOTOS: copy any <div class="gallery-item"> block  ║
+  ║  and update the data-cat, src, and alt.                          ║
+  ║                                                                  ║
+  ║  TO REMOVE A PHOTO: delete its <div class="gallery-item"> block ║
+  ║                                                                  ║
+  ║  Cloudinary tip: add /w_800,q_auto/ after /upload/ for auto     ║
+  ║  compression:                                                    ║
+  ║  .../upload/w_800,q_auto/dancefloor-1.jpg  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+  -->
+
+    <div class="gallery-grid" id="galleryGrid">
+
+      <!-- ══════════════════════════════════════════
+           DANCE FLOOR — dancefloor-1 to dancefloor-50
+           data-cat="dancefloor"
+           ══════════════════════════════════════════ -->
+
+      <!-- dancefloor-1 -->
+      <div class="gallery-item" data-cat="dancefloor">
+        <img loading="lazy"
+             src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-1.jpg"
+             alt="Dance floor at Palace Ottawa"/>  <!-- ← change alt description -->
+        <div class="gallery-overlay"><p>Dance Floor</p></div>
+      </div>
+
+      <!-- dancefloor-2 -->
+      <div class="gallery-item" data-cat="dancefloor">
+        <img loading="lazy"
+             src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-2.jpg"
+             alt="Dance floor at Palace Ottawa"/>
+        <div class="gallery-overlay"><p>Dance Floor</p></div>
+      </div>
+
+      <!-- dancefloor-3 -->
+      <div class="gallery-item" data-cat="dancefloor">
+        <img loading="lazy"
+             src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-3.jpg"
+             alt="Dance floor at Palace Ottawa"/>
+        <div class="gallery-overlay"><p>Dance Floor</p></div>
+      </div>
+
+      <!-- dancefloor-4 -->
+      <div class="gallery-item" data-cat="dancefloor">
+        <img loading="lazy"
+             src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-4.jpg"
+             alt="Dance floor at Palace Ottawa"/>
+        <div class="gallery-overlay"><p>Dance Floor</p></div>
+      </div>
+
+      <!-- dancefloor-5 -->
+      <div class="gallery-item" data-cat="dancefloor">
+        <img loading="lazy"
+             src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-5.jpg"
+             alt="Dance floor at Palace Ottawa"/>
+        <div class="gallery-overlay"><p>Dance Floor</p></div>
+      </div>
+
+      <!-- dancefloor-6 to dancefloor-50 follow the exact same pattern.
+           Just increment the number in the src URL.
+           They are pre-written below as compressed blocks: -->
+
+      <!-- dancefloor-6 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-6.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-7 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-7.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-8 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-8.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-9 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-9.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-10 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-10.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-11 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-11.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-12 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-12.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-13 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-13.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-14 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-14.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-15 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-15.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-16 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-16.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-17 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-17.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-18 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-18.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-19 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-19.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-20 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-20.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-21 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-21.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-22 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-22.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-23 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-23.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-24 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-24.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-25 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-25.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-26 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-26.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-27 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-27.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-28 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-28.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-29 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-29.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-30 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-30.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-31 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-31.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-32 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-32.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-33 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-33.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-34 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-34.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-35 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-35.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-36 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-36.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-37 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-37.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-38 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-38.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-39 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-39.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-40 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-40.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-41 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-41.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-42 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-42.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-43 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-43.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-44 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-44.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-45 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-45.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-46 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-46.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-47 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-47.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-48 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-48.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-49 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-49.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+      <!-- dancefloor-50 --><div class="gallery-item" data-cat="dancefloor"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/dancefloor-50.jpg" alt="Dance floor"/><div class="gallery-overlay"><p>Dance Floor</p></div></div>
+
+
+      <!-- ══════════════════════════════════════════
+           VIP FLOOR 2 — vipfloor2-1 to vipfloor2-50
+           data-cat="vipfloor2"
+           ══════════════════════════════════════════ -->
+      <!-- vipfloor2-1 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-1.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-2 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-2.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-3 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-3.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-4 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-4.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-5 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-5.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-6 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-6.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-7 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-7.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-8 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-8.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-9 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-9.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-10 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-10.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-11 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-11.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-12 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-12.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-13 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-13.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-14 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-14.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-15 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-15.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-16 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-16.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-17 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-17.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-18 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-18.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-19 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-19.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-20 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-20.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-21 to vipfloor2-50 — same pattern, increment the number -->
+      <!-- vipfloor2-21 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-21.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-22 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-22.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-23 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-23.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-24 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-24.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-25 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-25.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-26 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-26.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-27 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-27.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-28 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-28.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-29 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-29.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-30 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-30.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-31 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-31.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-32 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-32.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-33 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-33.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-34 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-34.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-35 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-35.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-36 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-36.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-37 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-37.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-38 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-38.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-39 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-39.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-40 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-40.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-41 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-41.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-42 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-42.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-43 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-43.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-44 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-44.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-45 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-45.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-46 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-46.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-47 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-47.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-48 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-48.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-49 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-49.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+      <!-- vipfloor2-50 --><div class="gallery-item" data-cat="vipfloor2"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/vipfloor2-50.jpg" alt="VIP Floor 2"/><div class="gallery-overlay"><p>VIP — Floor 2</p></div></div>
+
+
+      <!-- ══════════════════════════════════════════
+           DJ & STAGE — djstage-1 to djstage-50
+           data-cat="djstage"
+           ══════════════════════════════════════════ -->
+      <!-- djstage-1 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-1.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-2 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-2.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-3 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-3.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-4 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-4.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-5 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-5.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-6 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-6.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-7 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-7.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-8 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-8.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-9 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-9.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-10 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-10.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-11 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-11.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-12 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-12.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-13 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-13.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-14 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-14.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-15 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-15.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-16 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-16.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-17 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-17.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-18 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-18.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-19 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-19.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-20 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-20.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-21 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-21.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-22 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-22.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-23 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-23.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-24 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-24.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-25 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-25.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-26 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-26.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-27 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-27.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-28 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-28.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-29 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-29.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-30 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-30.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-31 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-31.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-32 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-32.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-33 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-33.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-34 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-34.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-35 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-35.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-36 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-36.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-37 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-37.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-38 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-38.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-39 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-39.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-40 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-40.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-41 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-41.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-42 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-42.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-43 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-43.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-44 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-44.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-45 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-45.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-46 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-46.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-47 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-47.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-48 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-48.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-49 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-49.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+      <!-- djstage-50 --><div class="gallery-item" data-cat="djstage"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/djstage-50.jpg" alt="DJ Stage"/><div class="gallery-overlay"><p>DJ & Stage</p></div></div>
+
+
+      <!-- ══════════════════════════════════════════
+           THE CROWD — crowd-1 to crowd-50
+           data-cat="crowd"
+           ══════════════════════════════════════════ -->
+      <!-- crowd-1 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-1.jpg" alt="The Crowd at Palace Ottawa"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-2 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-2.jpg" alt="The Crowd at Palace Ottawa"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-3 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-3.jpg" alt="The Crowd at Palace Ottawa"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-4 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-4.jpg" alt="The Crowd at Palace Ottawa"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-5 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-5.jpg" alt="The Crowd at Palace Ottawa"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-6 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-6.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-7 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-7.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-8 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-8.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-9 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-9.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-10 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-10.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-11 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-11.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-12 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-12.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-13 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-13.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-14 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-14.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-15 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-15.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-16 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-16.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-17 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-17.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-18 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-18.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-19 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-19.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-20 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-20.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-21 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-21.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-22 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-22.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-23 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-23.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-24 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-24.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-25 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-25.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-26 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-26.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-27 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-27.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-28 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-28.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-29 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-29.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-30 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-30.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-31 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-31.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-32 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-32.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-33 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-33.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-34 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-34.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-35 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-35.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-36 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-36.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-37 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-37.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-38 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-38.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-39 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-39.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-40 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-40.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-41 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-41.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-42 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-42.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-43 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-43.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-44 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-44.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-45 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-45.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-46 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-46.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-47 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-47.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-48 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-48.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-49 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-49.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+      <!-- crowd-50 --><div class="gallery-item" data-cat="crowd"><img loading="lazy" src="https://res.cloudinary.com/dzd4bw9fk/image/upload/crowd-50.jpg" alt="The Crowd"/><div class="gallery-overlay"><p>The Crowd</p></div></div>
+
+    </div><!-- /galleryGrid -->
+
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <button id="lightbox-prev">‹</button>
+  <button id="lightbox-next">›</button>
+  <img id="lightbox-img" src="" alt=""/>
+  <p id="lightbox-caption"></p>
+</div>
+
+<section style="padding:80px 0;text-align:center;border-top:1px solid rgba(255,255,255,0.08);">
+  <div class="container center">
+    <h2 class="section-title">See More on Instagram</h2>
+    <p class="body-text" style="margin:0 auto 32px;">Follow <strong>@thepalaceottawa</strong> for the latest photos, videos, and event announcements.</p>
+    <a href="https://www.instagram.com/thepalaceottawa/" target="_blank" class="btn btn-primary">Follow on Instagram</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo"><span class="logo-crown">♛</span><span>PALACE OTTAWA</span></div>
+      <p>Ottawa's premier Afrobeats nightclub.<br/>2 floors. Every Friday & Saturday.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Navigate</h4>
+      <a href="index.html">Home</a><a href="events.html">Events</a>
+      <a href="gallery.html">Gallery</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links">
+      <h4>Book</h4>
+      <a href="contact.html?type=table">Table Reservation</a>
+      <a href="contact.html?type=private">Private Event</a>
+      <a href="contact.html?type=promoter">Promoter Night</a>
+    </div>
+    <div class="footer-info">
+      <h4>Find Us</h4>
+      <p>400A Dalhousie St, Ottawa ON K1N 7A2</p>
+      <p><a href="mailto:thepalacekingsottawa@gmail.com">thepalacekingsottawa@gmail.com</a></p>
+      <p><a href="tel:+16133661045">+1 (613) 366-1045</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Palace Ottawa. All rights reserved.</p>
+    <a href="#">Privacy Policy</a>
+  </div>
+</footer>
+
+<!-- Masonry layout library — same technique as NP Prod -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/5.0.0/imagesloaded.pkgd.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/gallery.js"></script>
+<script>
+const items = document.querySelectorAll('.gallery-item');
+const grid  = document.getElementById('galleryGrid');
+
+// Fade in images on load, hide broken ones
+items.forEach(item => {
+  const img = item.querySelector('img');
+  if (!img) return;
+  if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+  else img.addEventListener('load',  () => img.classList.add('loaded'));
+  img.addEventListener('error', () => { item.remove(); });
+});
+
+// Build Masonry — called on init and after every filter change
+function buildMasonry() {
+  // Destroy existing instance cleanly
+  const existing = Masonry.data(grid);
+  if (existing) existing.destroy();
+
+  // Small delay so display:none/block has painted before Masonry measures
+  setTimeout(() => {
+    imagesLoaded(grid, () => {
+      new Masonry(grid, {
+        itemSelector: '.gallery-item:not([style*="none"])',
+        columnWidth:  24,   // fixed px column — avoids % issues with hidden items
+        gutter: 5,
+        fitWidth: true      // centers the grid
+      });
+    });
+  }, 50);
+}
+
+// Use Isotope instead — much better filter support
+// Actually: simplest reliable fix is CSS columns after filter
+function applyFilter(filter) {
+  items.forEach(item => {
+    const img = item.querySelector('img');
+    if (!img || !img.classList.contains('loaded')) return;
+    const show = filter === 'all' || item.dataset.cat === filter;
+    item.style.display = show ? '' : 'none';
+  });
+
+  // Destroy + recreate Masonry with only visible items
+  const existing = Masonry.data(grid);
+  if (existing) existing.destroy();
+
+  setTimeout(() => {
+    const visible = [...items].filter(i => i.style.display !== 'none');
+    if (!visible.length) return;
+    new Masonry(grid, {
+      itemSelector: '.gallery-item',
+      columnWidth:  visible[0],
+      percentPosition: true,
+      gutter: 5
+    });
+  }, 60);
+}
+
+// Init on page load
+window.addEventListener('load', () => applyFilter('all'));
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.dataset.filter);
+  });
+});
+
+// Lightbox
+let currentIndex = 0;
+const visibleItems = () => [...items].filter(i => i.style.display !== 'none' && i.querySelector('img.loaded'));
+const lb  = document.getElementById('lightbox');
+const lbImg = document.getElementById('lightbox-img');
+const lbCap = document.getElementById('lightbox-caption');
+
+function openLightbox(item) {
+  const img = item.querySelector('img');
+  if (!img || !img.classList.contains('loaded')) return;
+  currentIndex = [...items].indexOf(item);
+  lbImg.src = img.src;
+  lbCap.textContent = img.alt || '';
+  lb.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+items.forEach(item => {
+  item.addEventListener('click', () => openLightbox(item));
+});
+
+function closeLightbox() {
+  lb.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+
+document.getElementById('lightbox-prev').addEventListener('click', () => {
+  const vis = visibleItems();
+  if (!vis.length) return;
+  const idx = vis.findIndex(i => [...items].indexOf(i) === currentIndex);
+  openLightbox(vis[(idx - 1 + vis.length) % vis.length]);
+});
+
+document.getElementById('lightbox-next').addEventListener('click', () => {
+  const vis = visibleItems();
+  if (!vis.length) return;
+  const idx = vis.findIndex(i => [...items].indexOf(i) === currentIndex);
+  openLightbox(vis[(idx + 1) % vis.length]);
+});
+
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft')  document.getElementById('lightbox-prev').click();
+  if (e.key === 'ArrowRight') document.getElementById('lightbox-next').click();
+});
+</script>
+</body>
+</html>
