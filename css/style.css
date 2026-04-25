@@ -1141,9 +1141,27 @@ input, select, textarea { font: inherit; }
   .card-main { width: 160px; height: 160px; right: 20px; }
   .card-accent { width: 180px; height: 130px; right: 0; }
   .card-sm { width: 120px; height: 100px; right: 180px; bottom: 10px; }
-  .event-card { grid-template-columns: 60px 1fr; }
-  .event-card-flyer { display: none; }
-  .event-card-action { grid-column: 1 / -1; }
+  .event-card {
+  grid-template-columns: 70px 1fr;
+  gap: 12px;
+  }
+  .event-card-flyer {
+  display: block;
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  overflow: hidden;
+  }
+  .event-card-flyer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  }
+  .event-card-action {
+  grid-column: 1 / -1;
+  }
+
   .form-row { grid-template-columns: 1fr; }
   .contact-info-grid { grid-template-columns: 1fr; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
