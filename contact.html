@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact & Book — Palace Ottawa</title>
+  <meta name="description" content="Book a table, reserve Palace for a private event, or partner as a promoter. Contact Palace Ottawa today."/>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Palace Ottawa"/>
+  <meta property="og:title" content="Book — Palace Ottawa"/>
+  <meta property="og:description" content="Reserve a table, book a private event, or partner as a promoter at Palace Ottawa."/>
+  <meta property="og:url" content="https://thepalaceottawa.com/contact.html"/>
+  <meta property="og:image" content="https://res.cloudinary.com/dzd4bw9fk/image/upload/q_auto/f_auto/v1777081550/og-image.jpg"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Book — Palace Ottawa"/>
+  <meta name="twitter:description" content="Reserve a table, book a private event, or partner as a promoter at Palace Ottawa."/>
+  <meta name="twitter:image" content="https://res.cloudinary.com/dzd4bw9fk/image/upload/q_auto/f_auto/v1777081550/og-image.jpg"/>
+  <!-- Reservation system styles -->
+  <style>
+    /* Date selector card */
+    .res-date-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .res-date-card:hover { border-color: var(--gold-dark); }
+    .res-date-label .lbl {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      display: block; margin-bottom: 4px;
+    }
+    .res-date-label .sub { font-size: 13px; color: var(--white-muted); }
+    .res-date-input {
+      background: var(--dark); border: 1px solid var(--border);
+      color: var(--white); padding: 12px 16px;
+      border-radius: var(--radius); font-family: var(--font-body);
+      font-size: 14px; cursor: pointer; color-scheme: dark;
+    }
+    .res-date-input:focus { outline: none; border-color: var(--gold); }
+
+    /* Floor pills */
+    .floor-tabs {
+      display: flex; gap: 6px;
+      background: var(--dark); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 5px;
+      margin-bottom: 24px;
+    }
+    .floor-tab {
+      flex: 1; padding: 12px 14px; background: transparent;
+      border: none; border-radius: var(--radius);
+      color: var(--white-muted); font-family: var(--font-body);
+      font-size: 12px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all var(--transition);
+      display: flex; flex-direction: column; gap: 3px; align-items: center;
+    }
+    .floor-tab:hover { color: var(--white); }
+    .floor-tab.active { background: var(--gold); color: var(--black); }
+    .floor-tab .tab-sub {
+      font-family: var(--font-serif); font-style: italic; font-weight: 400;
+      font-size: 12px; letter-spacing: 0; text-transform: none; opacity: 0.85;
+    }
+
+    /* Map */
+    .map-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 18px;
+      margin-bottom: 16px;
+    }
+    .floor-map { display: none; }
+    .floor-map.active { display: block; }
+    .club-svg { width: 100%; height: auto; display: block; max-width: 480px; margin: 0 auto; }
+    .table-btn { cursor: pointer; transition: filter 0.2s; }
+    .table-btn:hover { filter: brightness(1.4); }
+    .table-btn.reserved { cursor: not-allowed; opacity: 0.22; }
+    .table-btn.selected .seat-shape {
+      stroke: var(--gold) !important; stroke-width: 2.5 !important;
+      filter: drop-shadow(0 0 10px rgba(201,168,76,0.6));
+    }
+
+    /* Legend */
+    .map-legend {
+      display: flex; justify-content: center; gap: 18px;
+      flex-wrap: wrap; padding: 12px 0 22px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 10px; letter-spacing: 0.1em; color: var(--white-muted);
+      text-transform: uppercase; font-weight: 500;
+    }
+    .legend-swatch { width: 11px; height: 11px; border-radius: 50%; }
+    .legend-swatch.t { background: rgba(255,255,255,0.92); }
+    .legend-swatch.tb { background: rgba(255,255,255,0.85); border-radius: 2px; }
+    .legend-swatch.tb-prem { background: var(--gold); border-radius: 2px; }
+    .legend-swatch.res { background: var(--white-dim); border: 1px solid var(--border); }
+
+    /* Selection card */
+    .selection-card {
+      background: linear-gradient(145deg, rgba(201,168,76,0.08), var(--card));
+      border: 1px solid var(--gold); border-radius: var(--radius-lg);
+      padding: 22px 26px; display: flex; align-items: center;
+      justify-content: space-between; gap: 18px; flex-wrap: wrap;
+      margin: 8px 0 28px; animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .sel-info { flex: 1; min-width: 200px; }
+    .sel-info .sel-tag {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 6px; display: block;
+    }
+    .sel-info .sel-id {
+      font-family: var(--font-serif); font-size: 1.5rem;
+      font-weight: 400; color: var(--white); line-height: 1.1;
+    }
+    .sel-info .sel-meta { font-size: 13px; color: var(--white-muted); margin-top: 4px; }
+    .sel-price { text-align: right; }
+    .sel-price .pl {
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--white-muted); display: block; margin-bottom: 2px;
+    }
+    .sel-price .pv {
+      font-family: var(--font-display); font-size: 1.8rem;
+      letter-spacing: 0.04em; color: var(--gold); line-height: 1;
+    }
+    .selection-empty {
+      text-align: center; padding: 24px 20px;
+      color: var(--white-dim); font-family: var(--font-serif);
+      font-style: italic; font-size: 14px;
+      border: 1px dashed var(--border); border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+    }
+
+    /* Tooltip */
+    .map-tooltip {
+      position: fixed; background: var(--dark);
+      border: 1px solid var(--gold-dark); border-radius: var(--radius);
+      padding: 12px 16px; pointer-events: none; z-index: 2000;
+      display: none; min-width: 180px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    }
+    .map-tooltip .tt-id {
+      font-family: var(--font-display); font-size: 1.2rem;
+      letter-spacing: 0.15em; color: var(--gold); line-height: 1;
+    }
+    .map-tooltip .tt-type {
+      font-family: var(--font-serif); font-style: italic;
+      font-size: 13px; color: var(--white); margin: 6px 0 8px;
+    }
+    .map-tooltip .tt-price { font-size: 12px; color: var(--white-muted); }
+    .map-tooltip .tt-price strong { color: var(--white); font-weight: 500; }
+    .map-tooltip .tt-status {
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border); font-weight: 500;
+    }
+    .map-tooltip .tt-status.available { color: #86efac; }
+    .map-tooltip .tt-status.reserved { color: #fca5a5; }
+
+    /* Recap bar */
+    .recap-bar {
+      background: var(--dark); border: 1px solid var(--gold-dark);
+      border-radius: var(--radius-lg); padding: 18px 22px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; margin-bottom: 24px;
+    }
+    .recap-cell { display: flex; flex-direction: column; gap: 3px; }
+    .recap-cell .rk {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+    }
+    .recap-cell .rv { font-size: 13px; color: var(--white); font-weight: 500; }
+
+    /* Interac panel */
+    .interac-panel {
+      background: linear-gradient(145deg, rgba(201,168,76,0.08), var(--card));
+      border: 1px solid var(--gold-dark); border-radius: var(--radius-lg);
+      padding: 24px; margin-top: 24px;
+    }
+    .interac-panel h4 {
+      font-family: var(--font-display); font-size: 1rem;
+      letter-spacing: 0.18em; color: var(--gold); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .interac-panel h4::before {
+      content: ''; width: 24px; height: 1px; background: var(--gold);
+    }
+    .interac-panel p {
+      font-size: 13px; color: var(--white-muted);
+      line-height: 1.7; margin-bottom: 8px;
+    }
+    .interac-panel .interac-email {
+      color: var(--gold); font-weight: 500; letter-spacing: 0.02em;
+    }
+    .interac-tag {
+      display: inline-block; background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.4); padding: 5px 12px;
+      border-radius: var(--radius); font-size: 11px; color: var(--gold);
+      margin: 6px 5px 0 0; font-weight: 500;
+    }
+    .interac-fine { font-size: 11px !important; opacity: 0.7; margin-top: 12px !important; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .recap-bar { grid-template-columns: repeat(2, 1fr); }
+      .floor-tab { font-size: 10px; padding: 10px 8px; }
+      .floor-tab .tab-sub { font-size: 10px; }
+      .selection-card { padding: 18px; }
+      .sel-price { width: 100%; text-align: left; }
+      .sel-price .pv { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar" class="nav-dark">
+  <a href="index.html" class="nav-logo">
+    <span class="logo-crown">♛</span>
+    <span class="logo-text">PALACE</span>
+    <span class="logo-sub">OTTAWA</span>
+  </a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+    <li><a href="contact.html" class="nav-cta">Book Now</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-bg">
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+  </div>
+  <div class="page-hero-content">
+    <p class="hero-eyebrow">Get In Touch</p>
+    <h1 class="page-title">Book Your <em>Experience</em></h1>
+    <p class="page-subtitle">Tables, private events, promoter nights — we want to hear from you.</p>
+  </div>
+</section>
+
+<!-- BOOKING TYPE TABS -->
+<section class="contact-section">
+  <div class="container">
+
+    <div class="booking-tabs">
+      <button class="tab-btn active" data-tab="table">🎟 Reserve a Table</button>
+      <button class="tab-btn" data-tab="private">🏰 Private Event</button>
+      <button class="tab-btn" data-tab="promoter">🎛 Promoter Night</button>
+      <button class="tab-btn" data-tab="general">✉️ General Inquiry</button>
+    </div>
+
+    <div class="tab-content-wrapper">
+
+      <!-- TABLE RESERVATION — interactive floor plan -->
+      <div class="tab-panel active" id="tab-table">
+        <div class="form-intro">
+          <h2>Reserve a Table</h2>
+          <p>Pick your spot on the floor plan, choose your event date, and secure your night at Palace.</p>
+          <div class="info-pills">
+            <span>🕙 11PM – 2AM</span>
+            <span>📅 Fri & Sat only</span>
+            <span>🥂 Bottle service available</span>
+          </div>
+        </div>
+
+        <!-- Date selector -->
+        <div class="res-date-card">
+          <div class="res-date-label">
+            <span class="lbl">Event Date</span>
+            <span class="sub">Friday & Saturday — 11PM to 2AM</span>
+          </div>
+          <input type="date" id="eventDate" class="res-date-input" />
+        </div>
+
+        <!-- Floor switcher -->
+        <div class="floor-tabs">
+          <button type="button" class="floor-tab active" data-floor="downstairs">
+            Downstairs
+            <span class="tab-sub">Main Floor</span>
+          </button>
+          <button type="button" class="floor-tab" data-floor="upstairs">
+            Upstairs
+            <span class="tab-sub">VIP Floor</span>
+          </button>
+        </div>
+
+        <!-- Map -->
+        <div class="map-wrap">
+          <!-- DOWNSTAIRS -->
+          <div class="floor-map active" id="map-downstairs">
+            <svg class="club-svg" viewBox="0 0 400 720" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="720" fill="#0a0a0a"/>
+              <path d="M 0 0 L 220 0 L 220 95 L 175 130 L 0 130 Z" fill="#1c1c1c"/>
+              <text x="100" y="68" text-anchor="middle" fill="rgba(255,255,255,0.32)" font-family="DM Sans, sans-serif" font-size="9" letter-spacing="2">BACK BAR</text>
+              <path d="M 240 0 L 400 0 L 400 130 L 290 130 L 240 95 Z" fill="#1c1c1c"/>
+              <text x="328" y="68" text-anchor="middle" fill="rgba(255,255,255,0.32)" font-family="DM Sans, sans-serif" font-size="9" letter-spacing="2">DOWNSTAIRS</text>
+              <rect x="0" y="148" width="60" height="240" fill="#161616"/>
+              <rect x="345" y="148" width="55" height="320" fill="#161616"/>
+              <path d="M 0 405 L 195 405 L 195 720 L 0 720 Z" fill="#161616"/>
+              <rect x="60" y="460" width="100" height="180" fill="#0a0a0a"/>
+              <rect x="20" y="460" width="20" height="60" fill="#0d0d0d"/>
+              <rect x="20" y="565" width="20" height="60" fill="#0d0d0d"/>
+              <path d="M 250 480 L 400 480 L 400 720 L 250 720 Z" fill="#161616"/>
+              <text x="325" y="610" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="DM Sans, sans-serif" font-size="9" letter-spacing="2" transform="rotate(90, 325, 610)">MAIN BAR</text>
+              <g opacity="0.7">
+                <text x="200" y="382" text-anchor="middle" fill="#c9a84c" font-family="Bebas Neue, sans-serif" font-size="14" letter-spacing="3">♛ PALACE</text>
+                <line x1="148" y1="395" x2="252" y2="395" stroke="#c9a84c" stroke-width="0.5"/>
+                <path d="M 195 395 L 200 405 L 205 395 Z" fill="#c9a84c" opacity="0.7"/>
+              </g>
+              <g class="table-btn" data-id="T1" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="80" cy="220" r="20" fill="rgba(255,255,255,0.92)"/><text x="80" y="225" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T1</text></g>
+              <g class="table-btn" data-id="TS1" data-floor="downstairs" data-type="TS" data-price="250"><circle class="seat-shape" cx="155" cy="220" r="20" fill="rgba(255,255,255,0.92)"/><text x="155" y="225" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TS1</text></g>
+              <g class="table-btn" data-id="TS2" data-floor="downstairs" data-type="TS" data-price="250"><circle class="seat-shape" cx="220" cy="220" r="20" fill="rgba(255,255,255,0.92)"/><text x="220" y="225" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TS2</text></g>
+              <g class="table-btn" data-id="TB3" data-floor="downstairs" data-type="TB" data-price="500"><rect class="seat-shape" x="58" y="248" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="82" y="273" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB3</text></g>
+              <g class="table-btn" data-id="TB4" data-floor="downstairs" data-type="TB" data-price="500"><rect class="seat-shape" x="58" y="312" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="82" y="337" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB4</text></g>
+              <g class="table-btn" data-id="TB1" data-floor="downstairs" data-type="TB" data-price="500"><rect class="seat-shape" x="296" y="225" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="320" y="250" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB1</text></g>
+              <g class="table-btn" data-id="TB2" data-floor="downstairs" data-type="TB" data-price="500"><rect class="seat-shape" x="296" y="305" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="320" y="330" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB2</text></g>
+              <g class="table-btn" data-id="T9" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="105" cy="395" r="18" fill="rgba(255,255,255,0.92)"/><text x="105" y="400" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T9</text></g>
+              <g class="table-btn" data-id="T10" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="148" cy="395" r="18" fill="rgba(255,255,255,0.92)"/><text x="148" y="400" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">T10</text></g>
+              <g class="table-btn" data-id="T2" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="222" cy="448" r="18" fill="rgba(255,255,255,0.92)"/><text x="222" y="453" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T2</text></g>
+              <g class="table-btn" data-id="T3" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="222" cy="498" r="18" fill="rgba(255,255,255,0.92)"/><text x="222" y="503" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T3</text></g>
+              <g class="table-btn" data-id="T4" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="222" cy="548" r="18" fill="rgba(255,255,255,0.92)"/><text x="222" y="553" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T4</text></g>
+              <g class="table-btn" data-id="T5" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="222" cy="598" r="18" fill="rgba(255,255,255,0.92)"/><text x="222" y="603" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T5</text></g>
+              <g class="table-btn" data-id="T6" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="170" cy="678" r="18" fill="rgba(255,255,255,0.92)"/><text x="170" y="683" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T6</text></g>
+              <g class="table-btn" data-id="T7" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="220" cy="678" r="18" fill="rgba(255,255,255,0.92)"/><text x="220" y="683" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T7</text></g>
+              <g class="table-btn" data-id="T8" data-floor="downstairs" data-type="T" data-price="250"><circle class="seat-shape" cx="270" cy="678" r="18" fill="rgba(255,255,255,0.92)"/><text x="270" y="683" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T8</text></g>
+              <g class="table-btn" data-id="TB5" data-floor="downstairs" data-type="TB" data-price="500"><rect class="seat-shape" x="62" y="468" width="98" height="170" rx="3" fill="rgba(255,255,255,0.85)"/><text x="111" y="558" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="13" font-weight="600">TB5</text></g>
+              <g class="table-btn" data-id="TB6" data-floor="downstairs" data-type="TB" data-price="500"><rect class="seat-shape" x="338" y="640" width="50" height="44" rx="2" fill="rgba(255,255,255,0.85)"/><text x="363" y="666" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB6</text></g>
+            </svg>
+          </div>
+
+          <!-- UPSTAIRS -->
+          <div class="floor-map" id="map-upstairs">
+            <svg class="club-svg" viewBox="0 0 400 720" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="720" fill="#0a0a0a"/>
+              <rect x="0" y="0" width="55" height="180" fill="#1c1c1c"/>
+              <line x1="0" y1="20" x2="55" y2="20" stroke="#262626" stroke-width="1"/>
+              <line x1="0" y1="40" x2="55" y2="40" stroke="#262626" stroke-width="1"/>
+              <line x1="0" y1="60" x2="55" y2="60" stroke="#262626" stroke-width="1"/>
+              <line x1="0" y1="80" x2="55" y2="80" stroke="#262626" stroke-width="1"/>
+              <rect x="55" y="0" width="220" height="180" fill="#222222"/>
+              <text x="335" y="100" text-anchor="middle" fill="rgba(255,255,255,0.32)" font-family="DM Sans, sans-serif" font-size="9" letter-spacing="2">UPSTAIRS</text>
+              <rect x="345" y="200" width="55" height="320" fill="#161616"/>
+              <rect x="0" y="220" width="40" height="200" fill="#161616"/>
+              <path d="M 100 470 L 280 470 Q 280 450 280 430 L 100 430 L 100 470 Z" fill="#161616"/>
+              <ellipse cx="190" cy="500" rx="100" ry="55" fill="#0e0e0e"/>
+              <rect x="20" y="600" width="120" height="60" rx="3" fill="#1c1c1c"/>
+              <text x="80" y="620" text-anchor="middle" fill="rgba(255,255,255,0.32)" font-family="DM Sans, sans-serif" font-size="8" letter-spacing="2">DJ BOOTH</text>
+              <circle cx="38" cy="640" r="6" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+              <circle cx="38" cy="640" r="2" fill="rgba(255,255,255,0.4)"/>
+              <rect x="60" y="635" width="14" height="10" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+              <line x1="63" y1="638" x2="71" y2="638" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+              <line x1="63" y1="641" x2="71" y2="641" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+              <circle cx="100" cy="640" r="6" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+              <circle cx="100" cy="640" r="2" fill="rgba(255,255,255,0.4)"/>
+              <g opacity="0.7">
+                <text x="285" y="660" text-anchor="middle" fill="#c9a84c" font-family="Bebas Neue, sans-serif" font-size="13" letter-spacing="3">♛ PALACE</text>
+                <line x1="240" y1="672" x2="330" y2="672" stroke="#c9a84c" stroke-width="0.5"/>
+              </g>
+              <g class="table-btn" data-id="TS5" data-floor="upstairs" data-type="TS" data-price="400"><circle class="seat-shape" cx="200" cy="120" r="25" fill="rgba(255,255,255,0.92)"/><text x="200" y="125" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="12" font-weight="600">TS5</text></g>
+              <g class="table-btn" data-id="TB10" data-floor="upstairs" data-type="TB" data-price="750"><rect class="seat-shape" x="42" y="240" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="66" y="265" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB10</text></g>
+              <g class="table-btn" data-id="T7" data-floor="upstairs" data-type="T" data-price="400"><circle class="seat-shape" cx="170" cy="262" r="20" fill="rgba(255,255,255,0.92)"/><text x="170" y="267" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T7</text></g>
+              <g class="table-btn" data-id="T10-VIP" data-floor="upstairs" data-type="T" data-price="400"><circle class="seat-shape" cx="305" cy="262" r="22" fill="rgba(255,255,255,0.92)"/><text x="305" y="267" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">T10</text></g>
+              <g class="table-btn" data-id="TB11" data-floor="upstairs" data-type="TB" data-price="750"><rect class="seat-shape" x="42" y="305" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="66" y="330" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB11</text></g>
+              <g class="table-btn" data-id="T12" data-floor="upstairs" data-type="T" data-price="400"><circle class="seat-shape" cx="118" cy="332" r="20" fill="rgba(255,255,255,0.92)"/><text x="118" y="337" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T12</text></g>
+              <g class="table-btn" data-id="T8" data-floor="upstairs" data-type="T" data-price="400"><circle class="seat-shape" cx="180" cy="332" r="20" fill="rgba(255,255,255,0.92)"/><text x="180" y="337" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T8</text></g>
+              <g class="table-btn" data-id="T9" data-floor="upstairs" data-type="T" data-price="400"><circle class="seat-shape" cx="240" cy="332" r="20" fill="rgba(255,255,255,0.92)"/><text x="240" y="337" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T9</text></g>
+              <g class="table-btn" data-id="TB7" data-floor="upstairs" data-type="TB" data-price="750"><rect class="seat-shape" x="305" y="305" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="329" y="330" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB7</text></g>
+              <g class="table-btn" data-id="TB8" data-floor="upstairs" data-type="TB" data-price="750"><rect class="seat-shape" x="305" y="370" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="329" y="395" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB8</text></g>
+              <g class="table-btn" data-id="TB9" data-floor="upstairs" data-type="TB" data-price="750"><rect class="seat-shape" x="305" y="435" width="48" height="40" rx="2" fill="rgba(255,255,255,0.85)"/><text x="329" y="460" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB9</text></g>
+              <g class="table-btn" data-id="T11" data-floor="upstairs" data-type="T" data-price="400"><circle class="seat-shape" cx="305" cy="510" r="22" fill="rgba(255,255,255,0.92)"/><text x="305" y="515" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="11" font-weight="600">T11</text></g>
+              <g class="table-btn" data-id="TB13" data-floor="upstairs" data-type="TB" data-price="1000"><rect class="seat-shape" x="40" y="555" width="50" height="38" rx="2" fill="#c9a84c" stroke="#e8c97a" stroke-width="0.5"/><text x="65" y="580" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB13</text></g>
+              <g class="table-btn" data-id="TB12" data-floor="upstairs" data-type="TB" data-price="1000"><rect class="seat-shape" x="105" y="555" width="50" height="38" rx="2" fill="#c9a84c" stroke="#e8c97a" stroke-width="0.5"/><text x="130" y="580" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB12</text></g>
+              <g class="table-btn" data-id="TB15" data-floor="upstairs" data-type="TB" data-price="1000"><rect class="seat-shape" x="40" y="608" width="50" height="38" rx="2" fill="#c9a84c" stroke="#e8c97a" stroke-width="0.5"/><text x="65" y="633" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB15</text></g>
+              <g class="table-btn" data-id="TB14" data-floor="upstairs" data-type="TB" data-price="1000"><rect class="seat-shape" x="105" y="608" width="50" height="38" rx="2" fill="#c9a84c" stroke="#e8c97a" stroke-width="0.5"/><text x="130" y="633" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB14</text></g>
+              <g class="table-btn" data-id="TB17" data-floor="upstairs" data-type="TB" data-price="1000"><rect class="seat-shape" x="40" y="660" width="50" height="38" rx="2" fill="#c9a84c" stroke="#e8c97a" stroke-width="0.5"/><text x="65" y="685" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB17</text></g>
+              <g class="table-btn" data-id="TB16" data-floor="upstairs" data-type="TB" data-price="1000"><rect class="seat-shape" x="105" y="660" width="50" height="38" rx="2" fill="#c9a84c" stroke="#e8c97a" stroke-width="0.5"/><text x="130" y="685" text-anchor="middle" fill="#0a0a0a" font-family="DM Sans" font-size="10" font-weight="600">TB16</text></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-swatch t"></div>Table</div>
+          <div class="legend-item"><div class="legend-swatch tb"></div>Salon</div>
+          <div class="legend-item"><div class="legend-swatch tb-prem"></div>Premium TB12–17</div>
+          <div class="legend-item"><div class="legend-swatch res"></div>Reserved</div>
+        </div>
+
+        <!-- Selection -->
+        <div id="selectionWrap">
+          <div class="selection-empty">Tap a spot on the floor plan to view details</div>
+        </div>
+
+        <!-- Form (hidden until table selected) -->
+        <form class="palace-form" id="tableForm" netlify name="table-reservation" data-netlify="true" style="display:none;">
+          <input type="hidden" name="form-name" value="table-reservation"/>
+          <input type="hidden" name="table_id" id="hidden_table"/>
+          <input type="hidden" name="floor" id="hidden_floor"/>
+          <input type="hidden" name="price" id="hidden_price"/>
+          <input type="hidden" name="event_date" id="hidden_date"/>
+
+          <div class="recap-bar" id="recapBar"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" name="first_name" placeholder="Your first name" required/>
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" name="last_name" placeholder="Your last name" required/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" name="email" placeholder="your@email.com" required/>
+            </div>
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" name="phone" placeholder="+1 (613) 000-0000" required/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Number of Guests *</label>
+              <select name="guests" required>
+                <option value="">Select group size</option>
+                <option>2 guests</option>
+                <option>3–4 guests</option>
+                <option>5–6 guests</option>
+                <option>7–10 guests</option>
+                <option>10+ guests</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Special Requests</label>
+              <input type="text" name="message" placeholder="Birthday, bottle preference…"/>
+            </div>
+          </div>
+
+          <!-- Interac panel -->
+          <div class="interac-panel">
+            <h4>Confirm With Interac e-Transfer</h4>
+            <p>Your spot is held for <strong style="color:var(--white);">24 hours</strong> while we await your deposit.</p>
+            <p>Send the deposit via Interac e-Transfer to:</p>
+            <p style="font-size: 15px; margin: 12px 0;"><span class="interac-email">thepalacekingsottawa@gmail.com</span></p>
+            <p>Use <strong style="color:var(--white);">your name + table number + date</strong> as the message — for example:</p>
+            <div>
+              <span class="interac-tag">Jean Dupont</span>
+              <span class="interac-tag" id="exTable">TB5</span>
+              <span class="interac-tag" id="exDate">May 2</span>
+            </div>
+            <p class="interac-fine">Reservation confirmed only after deposit is received. We'll email you within 2 hours.</p>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" style="margin-top:20px;">Submit Reservation Request</button>
+          <p class="form-note">By submitting, you agree to receive a confirmation email and follow-up regarding your deposit.</p>
+        </form>
+
+      </div>
+
+      <!-- PRIVATE EVENT -->
+      <div class="tab-panel" id="tab-private">
+        <div class="form-intro">
+          <h2>Rent Palace for Your Private Event</h2>
+          <p>Birthday parties, corporate gatherings, product launches, celebrations — Palace Ottawa is available for private hire at any time outside of regular club hours.</p>
+          <div class="info-pills">
+            <span>📅 Any day of the week</span>
+            <span>🕐 Outside club hours (2AM–11PM)</span>
+            <span>🏰 Full or partial venue</span>
+            <span>🍽 Catering options available</span>
+          </div>
+        </div>
+        <form class="palace-form" id="privateForm" netlify name="private-event">
+          <input type="hidden" name="form-name" value="private-event"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" name="full_name" placeholder="Your full name" required/>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" name="email" placeholder="your@email.com" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="phone" placeholder="+1 (613) 000-0000" required/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Event Date *</label>
+              <input type="date" name="event_date" required/>
+            </div>
+            <div class="form-group">
+              <label>Event Type *</label>
+              <select name="event_type" required>
+                <option value="">Select type</option>
+                <option>Birthday Party</option>
+                <option>Corporate Event</option>
+                <option>Wedding Reception</option>
+                <option>Product Launch</option>
+                <option>Graduation Party</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Estimated Guest Count *</label>
+              <select name="guests" required>
+                <option value="">Select</option>
+                <option>Under 50</option>
+                <option>50–100</option>
+                <option>100–200</option>
+                <option>200–300</option>
+                <option>300+</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Preferred Start Time</label>
+              <input type="time" name="start_time"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Space Needed</label>
+            <select name="space">
+              <option value="">No preference</option>
+              <option>Full Venue (both floors)</option>
+              <option>Floor 1 Only</option>
+              <option>Floor 2 / VIP Area Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Additional Services Needed</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label"><input type="checkbox" name="services" value="dj"/> DJ / Sound System</label>
+              <label class="checkbox-label"><input type="checkbox" name="services" value="catering"/> Catering / Bar Service</label>
+              <label class="checkbox-label"><input type="checkbox" name="services" value="decor"/> Decor Setup</label>
+              <label class="checkbox-label"><input type="checkbox" name="services" value="security"/> Security</label>
+              <label class="checkbox-label"><input type="checkbox" name="services" value="photography"/> Photography / Videography</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tell Us About Your Event</label>
+            <textarea name="message" rows="4" placeholder="Describe your event, any specific needs, theme, or questions…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Send Inquiry</button>
+          <p class="form-note">Our team will get back to you within 48 hours with availability and pricing.</p>
+        </form>
+      </div>
+
+      <!-- PROMOTER NIGHT -->
+      <div class="tab-panel" id="tab-promoter">
+        <div class="form-intro">
+          <h2>Host Your Night at Palace</h2>
+          <p>You bring the crowd, we bring the stage. Promoters can book Palace Ottawa for their own events on Fridays, Saturdays, or any other night — when we're not already booked. Revenue share and full production support available.</p>
+          <div class="info-pills">
+            <span>📅 Any day of the week</span>
+            <span>🎛 Full production support</span>
+            <span>💰 Revenue share options</span>
+            <span>📣 Marketing collaboration</span>
+          </div>
+        </div>
+        <form class="palace-form" id="promoterForm" netlify name="promoter-inquiry">
+          <input type="hidden" name="form-name" value="promoter-inquiry"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Promoter / Company Name *</label>
+              <input type="text" name="promoter_name" placeholder="Your name or company" required/>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" name="email" placeholder="your@email.com" required/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone *</label>
+              <input type="tel" name="phone" placeholder="+1 (613) 000-0000" required/>
+            </div>
+            <div class="form-group">
+              <label>Instagram / Social Handle</label>
+              <input type="text" name="social" placeholder="@yourhandle"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Preferred Event Date(s) *</label>
+              <input type="text" name="dates" placeholder="e.g. Any Friday in June, or specific date" required/>
+            </div>
+            <div class="form-group">
+              <label>Expected Attendance</label>
+              <select name="attendance">
+                <option value="">Select</option>
+                <option>Under 100</option>
+                <option>100–200</option>
+                <option>200–300</option>
+                <option>300+</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Event Concept / Music Genre *</label>
+            <textarea name="concept" rows="3" placeholder="Describe your event concept, music genres, target audience…" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Have you promoted events before?</label>
+            <select name="experience">
+              <option value="">Select</option>
+              <option>Yes — regularly</option>
+              <option>Yes — a few times</option>
+              <option>No — first event</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Any Links (past events, flyers, social media)</label>
+            <textarea name="links" rows="2" placeholder="Instagram posts, event links, etc."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Submit Promoter Inquiry</button>
+          <p class="form-note">We review all promoter applications carefully. Expect a response within 3 business days.</p>
+        </form>
+      </div>
+
+      <!-- GENERAL INQUIRY -->
+      <div class="tab-panel" id="tab-general">
+        <div class="form-intro">
+          <h2>General Inquiry</h2>
+          <p>Have a question? Want to know more about what we offer? Drop us a message and we'll get back to you.</p>
+        </div>
+        <form class="palace-form" id="generalForm" netlify name="general-inquiry">
+          <input type="hidden" name="form-name" value="general-inquiry"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name *</label>
+              <input type="text" name="name" placeholder="Your name" required/>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" name="email" placeholder="your@email.com" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" name="subject" placeholder="What's this about?"/>
+          </div>
+          <div class="form-group">
+            <label>Message *</label>
+            <textarea name="message" rows="5" placeholder="Write your message here…" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- CONTACT INFO BOX -->
+    <div class="contact-info-grid">
+      <div class="contact-info-card">
+        <div class="cic-icon">📍</div>
+        <h4>Location</h4>
+        <p>400A Dalhousie Street<br/>Ottawa, ON K1N 7A2</p>
+        <a href="https://maps.google.com/?q=400A+Dalhousie+Ottawa" target="_blank" class="btn btn-ghost btn-sm">Get Directions</a>
+      </div>
+      <div class="contact-info-card">
+        <div class="cic-icon">🕙</div>
+        <h4>Club Hours</h4>
+        <p><strong>Friday & Saturday</strong><br/>11PM – 2AM</p>
+        <p><strong>Private Events:</strong><br/>Any day, any time</p>
+      </div>
+      <div class="contact-info-card">
+        <div class="cic-icon">📞</div>
+        <h4>Reach Us</h4>
+        <p><a href="tel:+16133661045">+1 (613) 366-1045</a></p>
+        <p><a href="mailto:thepalacekingsottawa@gmail.com">thepalacekingsottawa@gmail.com</a></p>
+      </div>
+      <div class="contact-info-card">
+        <div class="cic-icon">📱</div>
+        <h4>Social Media</h4>
+        <p>Follow us for events,<br/>announcements & vibes.</p>
+        <div class="cic-social">
+          <a href="https://www.instagram.com/thepalaceottawa/" target="_blank">Instagram</a>
+          <a href="https://www.tiktok.com/@thepalaceottawa" target="_blank">TikTok</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <span class="logo-crown">♛</span>
+        <span>PALACE OTTAWA</span>
+      </div>
+      <p>Ottawa's premier Afrobeats nightclub.<br/>2 floors. Every Friday & Saturday.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Navigate</h4>
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links">
+      <h4>Book</h4>
+      <a href="contact.html?type=table">Table Reservation</a>
+      <a href="contact.html?type=private">Private Event</a>
+      <a href="contact.html?type=promoter">Promoter Night</a>
+    </div>
+    <div class="footer-info">
+      <h4>Find Us</h4>
+      <p>400A Dalhousie St<br/>Ottawa, ON K1N 7A2</p>
+      <p><a href="mailto:thepalacekingsottawa@gmail.com">thepalacekingsottawa@gmail.com</a></p>
+      <p><a href="tel:+16133661045">+1 (613) 366-1045</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Palace Ottawa. All rights reserved.</p>
+    <a href="#">Privacy Policy</a>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/contact.js"></script>
+
+<!-- Reservation system JS -->
+<script>
+(function() {
+  const typeLabels = { T: 'Table', TS: 'Stage Table', TB: 'Salon' };
+  let selectedTable = null;
+  let eventDate = '';
+
+  const dateInput = document.getElementById('eventDate');
+  if (!dateInput) return; // only run if reservations present
+
+  // Init date — next Friday or Saturday
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  while (d.getDay() !== 5 && d.getDay() !== 6) d.setDate(d.getDate() + 1);
+  dateInput.min = d.toISOString().split('T')[0];
+  dateInput.value = d.toISOString().split('T')[0];
+  eventDate = dateInput.value;
+  loadReservations();
+
+  dateInput.addEventListener('change', function() {
+    eventDate = this.value;
+    selectedTable = null;
+    document.querySelectorAll('.table-btn.selected').forEach(b => b.classList.remove('selected'));
+    loadReservations();
+    updateSelectionPreview();
+  });
+
+  // Floor tabs
+  document.querySelectorAll('.floor-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      const floor = this.dataset.floor;
+      document.querySelectorAll('.floor-map').forEach(m => m.classList.remove('active'));
+      document.getElementById('map-' + floor).classList.add('active');
+    });
+  });
+
+  function storageKey(date) { return 'palace_res_' + date; }
+  function getReservations(date) {
+    try { return JSON.parse(localStorage.getItem(storageKey(date)) || '{}'); } catch(e) { return {}; }
+  }
+  function saveReservation(date, tableId) {
+    const res = getReservations(date);
+    res[tableId] = true;
+    localStorage.setItem(storageKey(date), JSON.stringify(res));
+  }
+  function loadReservations() {
+    const res = getReservations(eventDate);
+    document.querySelectorAll('.table-btn').forEach(btn => {
+      const id = btn.dataset.id;
+      btn.classList.remove('selected');
+      if (res[id]) btn.classList.add('reserved');
+      else btn.classList.remove('reserved');
+    });
+  }
+
+  // Tooltip
+  let tooltip = document.getElementById('mapTooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'mapTooltip';
+    tooltip.className = 'map-tooltip';
+    document.body.appendChild(tooltip);
+  }
+
+  document.querySelectorAll('.table-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function(e) {
+      if (!eventDate) return;
+      const res = getReservations(eventDate);
+      const isRes = !!res[this.dataset.id];
+      const floorLabel = this.dataset.floor === 'upstairs' ? 'Floor 2 — VIP' : 'Floor 1 — Main';
+      tooltip.innerHTML =
+        '<div class="tt-id">' + this.dataset.id + '</div>' +
+        '<div class="tt-type">' + (typeLabels[this.dataset.type] || 'Table') + ' · ' + floorLabel + '</div>' +
+        '<div class="tt-price"><strong>$' + Number(this.dataset.price).toLocaleString() + '</strong> deposit</div>' +
+        '<div class="tt-status ' + (isRes ? 'reserved' : 'available') + '">' + (isRes ? '● Reserved' : '● Available') + '</div>';
+      tooltip.style.display = 'block';
+    });
+    btn.addEventListener('mousemove', function(e) {
+      tooltip.style.left = (e.clientX + 16) + 'px';
+      tooltip.style.top = (e.clientY + 16) + 'px';
+    });
+    btn.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
+
+    btn.addEventListener('click', function() {
+      if (!eventDate) { alert('Please select an event date first.'); return; }
+      const res = getReservations(eventDate);
+      if (res[this.dataset.id]) {
+        alert(this.dataset.id + ' is already reserved for this date. Please choose another spot.');
+        return;
+      }
+      document.querySelectorAll('.table-btn.selected').forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      selectedTable = {
+        id: this.dataset.id,
+        type: this.dataset.type,
+        price: this.dataset.price,
+        floor: this.dataset.floor
+      };
+      updateSelectionPreview();
+    });
+  });
+
+  function updateSelectionPreview() {
+    const wrap = document.getElementById('selectionWrap');
+    const form = document.getElementById('tableForm');
+    if (!selectedTable) {
+      wrap.innerHTML = '<div class="selection-empty">Tap a spot on the floor plan to view details</div>';
+      form.style.display = 'none';
+      return;
+    }
+    const floorLabel = selectedTable.floor === 'upstairs' ? 'Floor 2 — VIP' : 'Floor 1 — Main';
+    const dateFormatted = new Date(eventDate + 'T12:00:00').toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const shortDate = new Date(eventDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    wrap.innerHTML =
+      '<div class="selection-card">' +
+        '<div class="sel-info">' +
+          '<span class="sel-tag">Selected Spot</span>' +
+          '<div class="sel-id">' + selectedTable.id + ' — ' + typeLabels[selectedTable.type] + '</div>' +
+          '<div class="sel-meta">' + floorLabel + '</div>' +
+        '</div>' +
+        '<div class="sel-price">' +
+          '<span class="pl">Deposit</span>' +
+          '<div class="pv">$' + Number(selectedTable.price).toLocaleString() + '</div>' +
+        '</div>' +
+      '</div>';
+
+    // Fill recap and hidden fields
+    document.getElementById('recapBar').innerHTML =
+      '<div class="recap-cell"><span class="rk">Spot</span><span class="rv">' + selectedTable.id + '</span></div>' +
+      '<div class="recap-cell"><span class="rk">Floor</span><span class="rv">' + floorLabel + '</span></div>' +
+      '<div class="recap-cell"><span class="rk">Date</span><span class="rv">' + dateFormatted + '</span></div>' +
+      '<div class="recap-cell"><span class="rk">Deposit</span><span class="rv">$' + Number(selectedTable.price).toLocaleString() + '</span></div>';
+
+    document.getElementById('hidden_table').value = selectedTable.id;
+    document.getElementById('hidden_floor').value = floorLabel;
+    document.getElementById('hidden_price').value = '$' + selectedTable.price;
+    document.getElementById('hidden_date').value = dateFormatted;
+    document.getElementById('exTable').textContent = selectedTable.id;
+    document.getElementById('exDate').textContent = shortDate;
+
+    form.style.display = '';
+  }
+
+  // Save reservation locally on submit
+  const tableForm = document.getElementById('tableForm');
+  if (tableForm) {
+    tableForm.addEventListener('submit', function() {
+      if (selectedTable && eventDate) saveReservation(eventDate, selectedTable.id);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
