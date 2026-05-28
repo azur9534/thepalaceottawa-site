@@ -9,7 +9,7 @@ const eventDates = {
  // '2026-04': [24, 25],
   '2026-05': [29, 30],
   '2026-06': [6, 13, 19, 21, 30],
-  '2026-07': [1, 3],
+  '2026-07': [1, 3, 31],
 };
 
 // Calendar starts on TODAY's month automatically
